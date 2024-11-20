@@ -9,6 +9,21 @@ import (
 )
 
 var tasks = make(map[int]string)
+var tasksFile = "tasks.txt"
+
+func saveTasks(task string) {
+	file, err := os.OpenFile(tasksFile, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(task)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("File written successfully")
+}
 
 func addTasks() {
 	fmt.Println("Enter to do list")
@@ -35,6 +50,7 @@ func addTasks() {
 		tasks[len(tasks)] = taskDescription
 		fmt.Println("Task added:")
 		fmt.Println(taskDescription)
+		saveTasks(taskDescription)
 	} else {
 		fmt.Println("No task entered, returning to actions.")
 	}
@@ -52,6 +68,20 @@ func markDone() {
 }
 
 func viewTasks() {
+	data, err := os.OpenFile(tasksFile, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer data.Close()
+	scanner := bufio.NewScanner(data)
+	index := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		tasks[index] = line
+		index++
+	}
+
 	if len(tasks) == 0 {
 		fmt.Println("There are no tasks available")
 
